@@ -53,4 +53,24 @@ export const queryKeys = {
     trialBalance: (asOf?: string) => ['accounting', 'trial-balance', asOf] as const,
     rentRoll: () => ['accounting', 'rent-roll'] as const,
   },
+  admin: {
+    all: ['admin'] as const,
+    stats: () => ['admin', 'stats'] as const,
+    users: () => ['admin', 'users'] as const,
+    auditLogs: (filters: Record<string, string | undefined>) =>
+      ['admin', 'audit-logs', filters] as const,
+    systemHealth: () => ['admin', 'system-health'] as const,
+    queues: () => ['admin', 'queues'] as const,
+  },
+  reports: {
+    all: ['reports'] as const,
+    occupancy: (filters: Record<string, string | undefined>) =>
+      ['reports', 'occupancy', filters] as const,
+    revenue: (filters: Record<string, string | undefined>) =>
+      ['reports', 'revenue', filters] as const,
+    maintenance: (filters: Record<string, string | undefined>) =>
+      ['reports', 'maintenance', filters] as const,
+    rentRoll: (asOf?: string) => ['reports', 'rent-roll', asOf] as const,
+    delinquency: () => ['reports', 'delinquency'] as const,
+  },
 };

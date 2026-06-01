@@ -1,20 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useUiStore } from '@web/stores/ui-store';
 
 const ADMIN_ROLES = new Set(['org_admin', 'accountant']);
-
-export function useIsAdminRole(): boolean {
-  const token = useUiStore((s) => s.accessToken);
-  if (!token) {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('estateops_token');
-      if (stored) return parseRole(stored);
-    }
-    return false;
-  }
-  return parseRole(token);
-}
 
 function parseRole(token: string): boolean {
   try {
@@ -23,4 +12,18 @@ function parseRole(token: string): boolean {
   } catch {
     return false;
   }
+}
+
+export function useIsAdminRole(): boolean {
+  const accessToken = useUiStore((s) => s.accessToken);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const token =
+      accessToken ??
+      (typeof window !== 'undefined' ? localStorage.getItem('estateops_token') : null);
+    setIsAdmin(token ? parseRole(token) : false);
+  }, [accessToken]);
+
+  return isAdmin;
 }

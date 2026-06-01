@@ -1,6 +1,16 @@
 import { serverFetch } from './server';
 import type {
   AccountingDashboard,
+  AdminAuditLogEntry,
+  AdminOrgStats,
+  AdminQueueStats,
+  AdminSystemHealth,
+  AdminUser,
+  DelinquencyReport,
+  MaintenanceReport,
+  OccupancyReport,
+  RentRollReportRow,
+  RevenueReport,
   CommunicationRecord,
   CursorPage,
   GeneralLedgerLine,
@@ -151,5 +161,26 @@ export const serverApi = {
       serverFetch<CursorPage<MaintenanceTicket>>(
         `/vendors/${id}/tickets${qs(params)}`,
       ),
+  },
+  admin: {
+    stats: () => serverFetch<AdminOrgStats>('/admin/stats'),
+    users: () => serverFetch<AdminUser[]>('/admin/users'),
+    auditLogs: (params: Record<string, string | undefined>) =>
+      serverFetch<CursorPage<AdminAuditLogEntry>>(
+        `/admin/audit-logs${qs(params)}`,
+      ),
+    systemHealth: () => serverFetch<AdminSystemHealth>('/admin/system-health'),
+    queues: () => serverFetch<AdminQueueStats[]>('/admin/queues'),
+  },
+  reports: {
+    occupancy: (params: Record<string, string | undefined>) =>
+      serverFetch<OccupancyReport>(`/reports/occupancy${qs(params)}`),
+    revenue: (params: Record<string, string | undefined>) =>
+      serverFetch<RevenueReport>(`/reports/revenue${qs(params)}`),
+    maintenance: (params: Record<string, string | undefined>) =>
+      serverFetch<MaintenanceReport>(`/reports/maintenance${qs(params)}`),
+    rentRoll: (asOf?: string) =>
+      serverFetch<RentRollReportRow[]>(`/reports/rent-roll${qs({ asOf })}`),
+    delinquency: () => serverFetch<DelinquencyReport>('/reports/delinquency'),
   },
 };

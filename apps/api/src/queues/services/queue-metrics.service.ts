@@ -15,6 +15,7 @@ import {
   EMAIL_QUEUE,
   LEASE_PROCESSING_QUEUE,
   MAINTENANCE_TRIAGE_QUEUE,
+  NOTIFICATION_DELIVERY_QUEUE,
   SMS_QUEUE,
   WEBHOOK_QUEUE,
   ZOOM_PROCESSING_QUEUE,
@@ -39,6 +40,8 @@ export class QueueMetricsService implements OnModuleInit, OnModuleDestroy {
     @InjectQueue(ACCOUNTING_QUEUE) private readonly accountingQueue: Queue,
     @InjectQueue(WEBHOOK_QUEUE) private readonly webhookQueue: Queue,
     @InjectQueue(ZOOM_PROCESSING_QUEUE) private readonly zoomQueue: Queue,
+    @InjectQueue(NOTIFICATION_DELIVERY_QUEUE)
+    private readonly notificationDeliveryQueue: Queue,
   ) {
     collectDefaultMetrics({ register: this.registry });
 
@@ -106,10 +109,46 @@ export class QueueMetricsService implements OnModuleInit, OnModuleDestroy {
     return this.registry.metrics();
   }
 
+  async getQueueStats(): Promise<
+    Array<{
+      name: string;
+      waiting: number;
+      active: number;
+      failed: number;
+      depth: number;
+    }>
+  > {
+    const stats: Array<{
+      name: string;
+      waiting: number;
+      active: number;
+      failed: number;
+      depth: number;
+    }> = [];
+
+    for (const { name, queue } of this.getQueues()) {
+      const counts = await queue.getJobCounts('waiting', 'active', 'delayed', 'failed');
+      const waiting = counts.waiting ?? 0;
+      const active = counts.active ?? 0;
+      const delayed = counts.delayed ?? 0;
+      const failed = counts.failed ?? 0;
+      stats.push({
+        name,
+        waiting,
+        active,
+        failed,
+        depth: waiting + active + delayed,
+      });
+    }
+
+    return stats;
+  }
+
   private getQueues(): Array<{ name: string; queue: Queue }> {
     return [
       { name: EMAIL_QUEUE, queue: this.emailQueue },
       { name: SMS_QUEUE, queue: this.smsQueue },
+      { name: NOTIFICATION_DELIVERY_QUEUE, queue: this.notificationDeliveryQueue },
       { name: AI_PROCESSING_QUEUE, queue: this.aiQueue },
       { name: LEASE_PROCESSING_QUEUE, queue: this.leaseQueue },
       { name: MAINTENANCE_TRIAGE_QUEUE, queue: this.maintenanceQueue },

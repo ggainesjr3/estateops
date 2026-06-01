@@ -1,6 +1,16 @@
 import { clientFetch } from './client';
 import type {
   AccountingDashboard,
+  AdminAuditLogEntry,
+  AdminOrgStats,
+  AdminQueueStats,
+  AdminSystemHealth,
+  AdminUser,
+  DelinquencyReport,
+  MaintenanceReport,
+  OccupancyReport,
+  RentRollReportRow,
+  RevenueReport,
   CommunicationRecord,
   CursorPage,
   DocumentRecord,
@@ -287,5 +297,43 @@ export const api = {
           { method: 'POST', body: JSON.stringify(body), token },
         ),
     },
+  },
+  admin: {
+    stats: (token?: string) =>
+      clientFetch<AdminOrgStats>('/admin/stats', { token }),
+    users: (token?: string) =>
+      clientFetch<AdminUser[]>('/admin/users', { token }),
+    updateUserRole: (userId: string, role: string, token?: string) =>
+      clientFetch<AdminUser>(`/admin/users/${userId}/role`, {
+        method: 'PATCH',
+        body: JSON.stringify({ role }),
+        token,
+      }),
+    deactivateUser: (userId: string, token?: string) =>
+      clientFetch<AdminUser>(`/admin/users/${userId}/deactivate`, {
+        method: 'PATCH',
+        token,
+      }),
+    auditLogs: (params: Record<string, string | undefined>, token?: string) =>
+      clientFetch<CursorPage<AdminAuditLogEntry>>(
+        `/admin/audit-logs${qs(params)}`,
+        { token },
+      ),
+    systemHealth: (token?: string) =>
+      clientFetch<AdminSystemHealth>('/admin/system-health', { token }),
+    queues: (token?: string) =>
+      clientFetch<AdminQueueStats[]>('/admin/queues', { token }),
+  },
+  reports: {
+    occupancy: (params: Record<string, string | undefined>, token?: string) =>
+      clientFetch<OccupancyReport>(`/reports/occupancy${qs(params)}`, { token }),
+    revenue: (params: Record<string, string | undefined>, token?: string) =>
+      clientFetch<RevenueReport>(`/reports/revenue${qs(params)}`, { token }),
+    maintenance: (params: Record<string, string | undefined>, token?: string) =>
+      clientFetch<MaintenanceReport>(`/reports/maintenance${qs(params)}`, { token }),
+    rentRoll: (asOf: string | undefined, token?: string) =>
+      clientFetch<RentRollReportRow[]>(`/reports/rent-roll${qs({ asOf })}`, { token }),
+    delinquency: (token?: string) =>
+      clientFetch<DelinquencyReport>('/reports/delinquency', { token }),
   },
 };

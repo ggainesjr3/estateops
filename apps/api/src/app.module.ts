@@ -36,6 +36,8 @@ import { DocumentsModule } from './modules/documents/documents.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ZoomModule } from './modules/zoom/zoom.module';
 import { RealtimeModule } from './realtime/realtime.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { ReportsModule } from './modules/reports/reports.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
@@ -81,6 +83,8 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     NotificationsModule,
     ZoomModule,
     RealtimeModule,
+    AdminModule,
+    ReportsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }],
 })

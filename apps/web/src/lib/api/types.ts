@@ -470,3 +470,121 @@ export interface DocumentRecord {
   storageProvider: string;
   createdAt: string;
 }
+
+export interface AdminOrgStats {
+  totalProperties: number;
+  totalUnits: number;
+  occupancyRate: number;
+  totalTenants: number;
+  activeTenants: number;
+  totalLeases: number;
+  activeLeases: number;
+  openMaintenanceTickets: number;
+  criticalTickets: number;
+  monthlyRevenue: string;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  isActive: boolean;
+  joinedAt: string | null;
+}
+
+export interface AdminAuditLogEntry {
+  id: string;
+  createdAt: string;
+  userId: string | null;
+  userName: string | null;
+  userEmail: string | null;
+  action: string;
+  entityType: string;
+  entityId: string;
+  oldValue: Record<string, unknown> | null;
+  newValue: Record<string, unknown> | null;
+}
+
+export interface AdminSystemHealth {
+  database: 'ok' | 'error';
+  redis: 'ok' | 'error';
+  queues: Array<{ name: string; depth: number }>;
+}
+
+export interface AdminQueueStats {
+  name: string;
+  waiting: number;
+  active: number;
+  failed: number;
+  depth: number;
+}
+
+export interface OccupancyReport {
+  summary: {
+    totalUnits: number;
+    occupied: number;
+    vacant: number;
+    maintenance: number;
+    occupancyRate: number;
+  };
+  byProperty: Array<{
+    propertyName: string;
+    totalUnits: number;
+    occupied: number;
+    occupancyRate: number;
+  }>;
+  trend: Array<{ month: string; occupancyRate: number }>;
+}
+
+export interface RevenueReport {
+  summary: {
+    totalInvoiced: string;
+    totalCollected: string;
+    outstanding: string;
+    collectionRate: number;
+  };
+  byMonth: Array<{ month: string; invoiced: string; collected: string }>;
+  byProperty: Array<{ propertyName: string; invoiced: string; collected: string }>;
+}
+
+export interface MaintenanceReport {
+  summary: {
+    total: number;
+    open: number;
+    completed: number;
+    avgResolutionDays: number;
+    slaBreachRate: number;
+  };
+  byPriority: Array<{ priority: string; count: number }>;
+  byTrade: Array<{ trade: string; count: number }>;
+  byProperty: Array<{ propertyName: string; count: number; avgResolutionDays: number }>;
+}
+
+export interface RentRollReportRow {
+  property: string;
+  unit: string;
+  tenant: string | null;
+  leaseStart: string;
+  leaseEnd: string | null;
+  monthlyRent: string;
+  status: string;
+  daysPastDue: number;
+  balance: string;
+}
+
+export interface DelinquencyReport {
+  summary: {
+    totalDelinquent: number;
+    totalAmountOwed: string;
+    avgDaysPastDue: number;
+  };
+  tenants: Array<{
+    tenantName: string;
+    unit: string;
+    property: string;
+    amountOwed: string;
+    daysPastDue: number;
+  }>;
+}

@@ -1,21 +1,25 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@web/components/ui/button';
 import { Input } from '@web/components/ui/input';
 import { useUiStore } from '@web/stores/ui-store';
 
 export function TokenBanner() {
   const { accessToken, setAccessToken } = useUiStore();
+  const [mounted, setMounted] = useState(false);
+  const [hasToken, setHasToken] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const stored = localStorage.getItem('estateops_token');
     if (stored && !accessToken) {
       setAccessToken(stored);
     }
+    setHasToken(Boolean(stored ?? accessToken));
   }, [accessToken, setAccessToken]);
 
-  if (accessToken) {
+  if (!mounted || hasToken || accessToken) {
     return null;
   }
 

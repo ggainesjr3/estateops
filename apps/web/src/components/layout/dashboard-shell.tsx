@@ -2,19 +2,23 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import {
   Building2,
   Calculator,
+  FileBarChart,
   FileText,
   HardHat,
   LogOut,
   Menu,
+  Shield,
   Users,
   Wrench,
   X,
 } from 'lucide-react';
 import { Button } from '@web/components/ui/button';
 import { PwaInstallBanner } from '@web/components/pwa/pwa-install-banner';
+import { getCurrentUserRole, isOrgAdminRole } from '@web/lib/auth/decode-token';
 import { cn } from '@web/lib/utils';
 import { useUiStore } from '@web/stores/ui-store';
 
@@ -25,9 +29,12 @@ const nav = [
   { href: '/tenants', label: 'Tenants', icon: Users },
   { href: '/leases', label: 'Leases', icon: FileText },
   { href: '/accounting/dashboard', label: 'Accounting', icon: Calculator },
+  { href: '/reports', label: 'Reports', icon: FileBarChart },
   { href: '/maintenance', label: 'Maintenance', icon: Wrench },
   { href: '/vendors', label: 'Vendors', icon: HardHat },
 ];
+
+const adminNavItem = { href: '/admin/overview', label: 'Admin', icon: Shield };
 
 const bottomNav = nav.filter((item) =>
   ['/properties', '/tenants', '/maintenance', '/accounting/dashboard'].includes(item.href),
@@ -35,6 +42,8 @@ const bottomNav = nav.filter((item) =>
 
 function isNavActive(pathname: string, href: string): boolean {
   if (href.startsWith('/accounting')) return pathname.startsWith('/accounting');
+  if (href.startsWith('/admin')) return pathname.startsWith('/admin');
+  if (href.startsWith('/reports')) return pathname.startsWith('/reports');
   if (href === '/maintenance') return pathname.startsWith('/maintenance');
   if (href === '/vendors') return pathname.startsWith('/vendors');
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -43,8 +52,13 @@ function isNavActive(pathname: string, href: string): boolean {
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [showAdmin, setShowAdmin] = useState(false);
   const { sidebarOpen, setSidebarOpen, toggleSidebar, setAccessToken } =
     useUiStore();
+
+  useEffect(() => {
+    setShowAdmin(isOrgAdminRole(getCurrentUserRole()));
+  }, []);
 
   function handleSignOut() {
     localStorage.removeItem('estateops_token');
@@ -101,6 +115,21 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               {label}
             </Link>
           ))}
+          {showAdmin && (
+            <Link
+              href={adminNavItem.href}
+              onClick={() => setSidebarOpen(false)}
+              className={cn(
+                'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors',
+                isNavActive(pathname, adminNavItem.href)
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+              )}
+            >
+              <Shield className="h-4 w-4 shrink-0" />
+              {adminNavItem.label}
+            </Link>
+          )}
         </nav>
         <div className="border-t p-3">
           <Button

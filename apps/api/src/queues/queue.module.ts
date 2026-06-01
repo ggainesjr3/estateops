@@ -139,7 +139,7 @@ const bullBoardFeatures = ALL_QUEUE_NAMES.map((name) => ({
     NotificationDeliveryProcessor,
     QueueAdminAuthMiddleware,
   ],
-  exports: [BullModule, QueueProducerService, SchedulerService, OrgJobContextService],
+  exports: [BullModule, QueueProducerService, SchedulerService, OrgJobContextService, QueueMetricsService],
 })
 export class QueueModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
