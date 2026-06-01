@@ -1,0 +1,15 @@
+{
+  "extends": "@estateops/config/typescript/next.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@web/*": ["./src/*"],
+      "@shared/*": ["../../packages/shared/src/*"]
+    },
+    "plugins": [{ "name": "next" }],
+    "allowJs": true,
+    "incremental": true
+  },
+  "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

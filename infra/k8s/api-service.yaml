@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: estateops-api
+  namespace: estateops
+  labels:
+    app.kubernetes.io/name: estateops
+    app.kubernetes.io/component: api
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/component: api
+  ports:
+    - name: http
+      port: 3001
+      targetPort: 3001

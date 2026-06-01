@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: estateops-config
+  namespace: estateops
+  labels:
+    app.kubernetes.io/name: estateops
+data:
+  NODE_ENV: production
+  API_PORT: '3001'
+  WEB_PORT: '3000'
+  DATABASE_HOST: postgres
+  DATABASE_PORT: '5432'
+  DATABASE_NAME: estateops
+  REDIS_HOST: redis
+  REDIS_PORT: '6379'
+  NEXT_PUBLIC_API_URL: http://estateops-api:3001

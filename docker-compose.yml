@@ -1,0 +1,102 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: estateops-postgres
+    restart: unless-stopped
+    ports:
+      - '${DATABASE_PORT:-5433}:5432'
+    environment:
+      POSTGRES_USER: ${DATABASE_USER:-estateops}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-estateops}
+      POSTGRES_DB: ${DATABASE_NAME:-estateops}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${DATABASE_USER:-estateops} -d ${DATABASE_NAME:-estateops}',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: estateops-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/api.Dockerfile
+      target: dev
+    container_name: estateops-api
+    restart: unless-stopped
+    ports:
+      - '3001:3001'
+    environment:
+      NODE_ENV: development
+      HOST: 0.0.0.0
+      PORT: 3001
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: ${DATABASE_USER:-estateops}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-estateops}
+      DATABASE_NAME: ${DATABASE_NAME:-estateops}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - ./apps/api/src:/app/apps/api/src
+      - ./packages/shared/src:/app/packages/shared/src
+      - ./packages/config:/app/packages/config
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3001/api/health/live']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  web:
+    build:
+      context: .
+      dockerfile: infra/docker/web.Dockerfile
+      target: dev
+    container_name: estateops-web
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+    volumes:
+      - ./apps/web/src:/app/apps/web/src
+      - ./packages/shared/src:/app/packages/shared/src
+      - ./packages/config:/app/packages/config
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+volumes:
+  postgres_data:
